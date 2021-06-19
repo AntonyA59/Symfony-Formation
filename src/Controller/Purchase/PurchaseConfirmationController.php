@@ -2,11 +2,11 @@
 
 namespace App\Controller\Purchase;
 
-use DateTime;
+
 use App\Entity\Purchase;
 use App\Cart\CartService;
-use App\Entity\PurchaseItem;
 use App\Form\CartConfirmationType;
+use App\Purchase\PurchasePersister;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,17 +17,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class PurchaseConfirmationController extends AbstractController
 {
 
-
-
     protected $cartService;
     protected $em;
+    protected $persister;
 
-    public function __construct(CartService $cartService, EntityManagerInterface $em)
+    public function __construct(CartService $cartService, EntityManagerInterface $em, PurchasePersister $persister)
     {
-
-
         $this->cartService = $cartService;
         $this->em = $em;
+        $this->persister = $persister;
     }
     /** 
      * @Route("/purchase/confirm", name="purchase_confirm") 
@@ -47,8 +45,7 @@ class PurchaseConfirmationController extends AbstractController
             $this->addFlash('warning', 'Vous devez remplir le formulaire de confirmation');
             $this->redirectToRoute('cart_show');
         }
-        // 3 . Si je ne suis pas connecté : dégager (Security)
-        $user = $this->getUser();
+
 
         // 4 . Si il n'y a pas de produits dans mon panier : dégager (CartService)
         $cartItems = $this->cartService->getDetailedCardItems();
@@ -62,34 +59,11 @@ class PurchaseConfirmationController extends AbstractController
         /** @var Purchase */
         $purchase = $form->getData();
 
-        // 6. Nous allons la lier avec l'utilisateur actuellement connecté (Security)
-        $purchase->setUser($user)
-            ->setPurchasedAt(new DateTime())
-            ->setTotal($this->cartService->getTotal());
-        // 7. Nous allons la lier avec les produits qui sont dans le panier (CartService)
-
-
-        foreach ($this->cartService->getDetailedCardItems() as $cartItem) {
-            $purchaseItem = new PurchaseItem();
-            $purchaseItem
-                ->setPurchase($purchase)
-                ->setProduct($cartItem->product)
-                ->setProductName($cartItem->product->getName())
-                ->setQuantity($cartItem->qty)
-                ->setTotal($cartItem->getTotal())
-                ->setProductPrice($cartItem->product->getPrice());
-
-
-            $this->em->persist($purchaseItem);
-        }
-
-
-        // 8 . Nous allons enregistrer la commande () (EntityManagerInterface)
-        $this->em->flush();
+        $this->persister->storePurchase($purchase);
         
-        $this->cartService->empty();
 
-        $this->addFlash('success', 'La commande a bien été enregistré');
-        return $this->redirectToRoute('purchase_index');
+        return $this->redirectToRoute('purchase_payment_form', [
+            'id' => $purchase->getId()
+        ]);
     }
 }

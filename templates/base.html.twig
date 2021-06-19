@@ -6,24 +6,27 @@
 			{% block title %}Welcome!
 			{% endblock %}
 		</title>
+		<link rel="stylesheet" href="https://bootswatch.com/5/lumen/bootstrap.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> 
+		
+		{% block stylesheets %}{% endblock %}
+		
 
-		{% block stylesheets %}
-			<link rel="stylesheet" href="https://bootswatch.com/5/lumen/bootstrap.min.css">
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-		{% endblock %}
+		<body>
+			{% include "shared/_navbar.html.twig" %}
 
-		{% block javascripts %}{% endblock %}
-	</head>
-	<body>
-		{% include "shared/_navbar.html.twig" %}
+			<div class="container pt-5">
+				{% for rubrique, messages in app.flashes %}
+					<div class="alert alert-{{rubrique}}">
+						{% for message in messages %}
+							<p>{{message}}</p>
+						{% endfor %}
+					</div>
+				{% endfor %}
 
-		<div class="container pt-5">	{% for rubrique, messages in app.flashes %}
-		<div class="alert alert-{{rubrique}}">
-		{% for message in messages %}
-			<p>{{message}}</p>
-		{% endfor %}
-		</div>
-	{% endfor %} {% block body %}{% endblock %}
-			</div>
+				{% block body %}{% endblock %}
+				{% block javascripts %}{% endblock %}
+			</head>
 		</body>
-	</html>
+	</head>
+</html>

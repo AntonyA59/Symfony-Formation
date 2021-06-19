@@ -5,7 +5,6 @@ namespace App\Cart;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\ref;
 
 class CartService
 {
