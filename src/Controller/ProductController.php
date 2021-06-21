@@ -51,7 +51,7 @@ class ProductController extends AbstractController
         
         
         
-        $dispatcher->dispatch(new ProductViewEvent($product), 'product.view');
+        // $dispatcher->dispatch(new ProductViewEvent($product), 'product.view');
         
         return $this->render('product/show.html.twig', [
             'product' => $product,
